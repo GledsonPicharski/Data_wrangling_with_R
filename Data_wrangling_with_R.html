@@ -241,6 +241,30 @@ div.tocify {
 <li><a href="https://www.rstudio.com/products/rstudio/download/">RStudio:</a></li>
 </ul>
 </div>
+<div id="carregandoinstalando-pacotes" class="section level2">
+<h2>Carregando/Instalando Pacotes</h2>
+<p>Instale e/ou carregue os seguintes pacotes:</p>
+<pre class="r"><code>## Install packages if needed
+# install.packages('devtools')
+# install.packages('readr')
+# install.packages('dplyr')
+# install.packages('tidyr')
+# install.packages('stringr')
+# install.packages('ggplot2')
+
+# Load packages
+library(devtools)
+library(readr)
+# library(plyr)
+library(dplyr)
+library(broom)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+
+# Check package versions after Packages pane -&gt; Update
+devtools::session_info()</code></pre>
+</div>
 </div>
 
 

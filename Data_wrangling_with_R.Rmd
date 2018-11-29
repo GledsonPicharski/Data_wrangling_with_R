@@ -29,3 +29,31 @@ output:
 - [R:](https://cran.rstudio.com/)
 - [RStudio:](https://www.rstudio.com/products/rstudio/download/)
 
+
+## Carregando/Instalando Pacotes
+
+Instale e/ou carregue os seguintes pacotes:
+
+```{r, eval=T,echo=T,warning=FALSE, message=F, results='hide'}
+
+## Install packages if needed
+# install.packages('devtools')
+# install.packages('readr')
+# install.packages('dplyr')
+# install.packages('tidyr')
+# install.packages('stringr')
+# install.packages('ggplot2')
+
+# Load packages
+library(devtools)
+library(readr)
+# library(plyr)
+library(dplyr)
+library(broom)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+
+# Check package versions after Packages pane -> Update
+devtools::session_info()
+```
