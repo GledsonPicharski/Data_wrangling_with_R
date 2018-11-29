@@ -1,0 +1,31 @@
+---
+title: "Data wrangling com dplyr e tidyr"
+author: "Gledson L. Picharski"
+date: "`r format(Sys.time(), '%d/%m/%Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    theme: cosmo
+  pdf_document:
+    toc: yes
+---
+  
+
+
+# Visão global 
+
+
+## Resources  
+
+- [Data wrangling cheatsheet (`dplyr`,`tidyr`)](http://ucsb-bren.github.io/refs/cheatsheets/data-wrangling-cheatsheet.pdf)
+
+
+
+
+## R e Rstudio
+
+- [R:](https://cran.rstudio.com/)
+- [RStudio:](https://www.rstudio.com/products/rstudio/download/)
+
