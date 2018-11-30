@@ -221,24 +221,33 @@ div.tocify {
 
 <h1 class="title toc-ignore">Data wrangling com dplyr e tidyr</h1>
 <h4 class="author"><em>Gledson L. Picharski</em></h4>
-<h4 class="date"><em>29/11/2018</em></h4>
+<h4 class="date"><em>30/11/2018</em></h4>
 
 </div>
 
 
-<div id="visao-global" class="section level1">
-<h1>Visão global</h1>
-<div id="resources" class="section level2">
-<h2>Resources</h2>
+<div id="visao-geral" class="section level1">
+<h1>Visão Geral</h1>
+<div id="recursos" class="section level2">
+<h2>Recursos</h2>
 <ul>
-<li><a href="http://ucsb-bren.github.io/refs/cheatsheets/data-wrangling-cheatsheet.pdf">Data wrangling cheatsheet (<code>dplyr</code>,<code>tidyr</code>)</a></li>
+<li><a href="https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf">Data wrangling cheatsheet (<code>dplyr</code>,<code>tidyr</code>)</a></li>
+<li><a href="https://www.tidyverse.org/">tidyverse</a></li>
+<li><a href="https://dplyr.tidyverse.org/">dplyr no tidyverse</a></li>
+<li><a href="https://tidyr.tidyverse.org/">tidyr no tidyverse</a></li>
+<li><a href="https://www.rstudio.com/resources/webinars/data-wrangling-with-r-and-rstudio/">Data wrangling with R and RStudio</a></li>
+<li><a href="https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html">dplyr vignette: Introduction to dplyr</a></li>
+<li><a href="https://cran.rstudio.com/web/packages/dplyr/vignettes/two-table.html">Two-table verbs</a></li>
+<li><a href="https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html">tidyr vignette: Tidy data</a></li>
+<li><a href="https://rpubs.com/justmarkham/dplyr-tutorial">Introduction to dplyr for Faster Data Manipulation in R</a></li>
 </ul>
 </div>
 <div id="r-e-rstudio" class="section level2">
 <h2>R e Rstudio</h2>
+<p>Caso ainda não tenha, instalale o R e RStudio.</p>
 <ul>
-<li><a href="https://cran.rstudio.com/">R:</a></li>
-<li><a href="https://www.rstudio.com/products/rstudio/download/">RStudio:</a></li>
+<li><a href="https://cran.rstudio.com/">Download R</a></li>
+<li><a href="https://www.rstudio.com/products/rstudio/download/">Download RStudio</a></li>
 </ul>
 </div>
 <div id="carregandoinstalando-pacotes" class="section level2">
@@ -257,13 +266,503 @@ library(devtools)
 library(readr)
 # library(plyr)
 library(dplyr)
-library(broom)
 library(tidyr)
 library(stringr)
 library(ggplot2)
 
 # Check package versions after Packages pane -&gt; Update
 devtools::session_info()</code></pre>
+</div>
+</div>
+<div id="principais-comandos-do-dplyr-e-do-tidyr" class="section level1">
+<h1>Principais comandos do dplyr e do tidyr</h1>
+<p>Tidyr e dplyr são projetados para ajudar a manipular conjuntos de dados, permitindo converter entre formatos <em>wide</em> e <em>long</em>, preencher valores e combinações ausentes, separar ou mesclar várias colunas, renomear e criar novas variáveis e resumir dados de acordo com o agrupamento variáveis.</p>
+<p>Dplyr e tidyr contam com os seguintes comandos principais:</p>
+<ul>
+<li>Tidyr</li>
+<li><code>gather ()</code> e <code>spread ()</code> convertem dados entre formato largo e longo</li>
+<li><code>separate ()</code> e <code>unite ()</code> separam uma única coluna em múltiplas colunas e vice-versa</li>
+<li><p><code>complete ()</code> transforma valores faltantes implícitos em valores ausentes explícitos, completando combinações de dados perdidas</p></li>
+<li>Dplyr</li>
+<li>dados do subconjunto <code>filter ()</code> baseados em critérios lógicos</li>
+<li><code>select ()</code> seleciona certas colunas</li>
+<li><code>organize ()</code> ordena linhas pelo valor de uma coluna</li>
+<li>rename () rename colunas</li>
+<li><code>group_by ()</code> agrupa dados por variáveis comuns para executar cálculos</li>
+<li><code>mutate ()</code> cria uma nova variável / coluna</li>
+<li><p><code>summarize ()</code> resume os dados em uma única linha de valores</p></li>
+</ul>
+<div id="gather-e-spread" class="section level2">
+<h2>Gather e Spread</h2>
+<pre class="r"><code>## Gather (from example(gather)).
+
+# get first observation for each Species in iris data -- base R
+mini_iris &lt;- iris[c(1, 51, 101), ]
+# gather Sepal.Length, Sepal.Width, Petal.Length, Petal.Width
+gather(mini_iris, key = flower_att, value = measurement,
+       Sepal.Length, Sepal.Width, Petal.Length, Petal.Width)</code></pre>
+<pre><code>##       Species   flower_att measurement
+## 1      setosa Sepal.Length         5.1
+## 2  versicolor Sepal.Length         7.0
+## 3   virginica Sepal.Length         6.3
+## 4      setosa  Sepal.Width         3.5
+## 5  versicolor  Sepal.Width         3.2
+## 6   virginica  Sepal.Width         3.3
+## 7      setosa Petal.Length         1.4
+## 8  versicolor Petal.Length         4.7
+## 9   virginica Petal.Length         6.0
+## 10     setosa  Petal.Width         0.2
+## 11 versicolor  Petal.Width         1.4
+## 12  virginica  Petal.Width         2.5</code></pre>
+<pre class="r"><code># same result but less verbose
+gather(mini_iris, key = flower_att, value = measurement, -Species)</code></pre>
+<pre><code>##       Species   flower_att measurement
+## 1      setosa Sepal.Length         5.1
+## 2  versicolor Sepal.Length         7.0
+## 3   virginica Sepal.Length         6.3
+## 4      setosa  Sepal.Width         3.5
+## 5  versicolor  Sepal.Width         3.2
+## 6   virginica  Sepal.Width         3.3
+## 7      setosa Petal.Length         1.4
+## 8  versicolor Petal.Length         4.7
+## 9   virginica Petal.Length         6.0
+## 10     setosa  Petal.Width         0.2
+## 11 versicolor  Petal.Width         1.4
+## 12  virginica  Petal.Width         2.5</code></pre>
+<pre class="r"><code># repeat iris example using dplyr and the pipe operator
+library(dplyr)
+mini_iris &lt;-
+  iris %&gt;%
+  group_by(Species) %&gt;%
+  slice(1)
+mini_iris %&gt;% gather(key = flower_att, value = measurement, -Species)</code></pre>
+<pre><code>## # A tibble: 12 x 3
+## # Groups:   Species [3]
+##    Species    flower_att   measurement
+##    &lt;fct&gt;      &lt;chr&gt;              &lt;dbl&gt;
+##  1 setosa     Sepal.Length         5.1
+##  2 versicolor Sepal.Length         7  
+##  3 virginica  Sepal.Length         6.3
+##  4 setosa     Sepal.Width          3.5
+##  5 versicolor Sepal.Width          3.2
+##  6 virginica  Sepal.Width          3.3
+##  7 setosa     Petal.Length         1.4
+##  8 versicolor Petal.Length         4.7
+##  9 virginica  Petal.Length         6  
+## 10 setosa     Petal.Width          0.2
+## 11 versicolor Petal.Width          1.4
+## 12 virginica  Petal.Width          2.5</code></pre>
+<pre class="r"><code>## spread example
+
+# Spread and gather are complements
+df &lt;- data.frame(x = c(&quot;a&quot;, &quot;b&quot;), y = c(3, 4), z = c(5, 6))
+df %&gt;% spread(x, y) %&gt;% gather(x, y, a:b, na.rm = TRUE)</code></pre>
+<pre><code>##   z x y
+## 1 5 a 3
+## 4 6 b 4</code></pre>
+<pre class="r"><code># Use 'convert = TRUE' to produce variables of mixed type
+df &lt;- data.frame(row = rep(c(1, 51), each = 3),
+                 var = c(&quot;Sepal.Length&quot;, &quot;Species&quot;, &quot;Species_num&quot;),
+                 value = c(5.1, &quot;setosa&quot;, 1, 7.0, &quot;versicolor&quot;, 2))
+df %&gt;% spread(var, value) %&gt;% str</code></pre>
+<pre><code>## 'data.frame':    2 obs. of  4 variables:
+##  $ row         : num  1 51
+##  $ Sepal.Length: Factor w/ 6 levels &quot;1&quot;,&quot;2&quot;,&quot;5.1&quot;,..: 3 4
+##  $ Species     : Factor w/ 6 levels &quot;1&quot;,&quot;2&quot;,&quot;5.1&quot;,..: 5 6
+##  $ Species_num : Factor w/ 6 levels &quot;1&quot;,&quot;2&quot;,&quot;5.1&quot;,..: 1 2</code></pre>
+<pre class="r"><code>df %&gt;% spread(var, value, convert = TRUE) %&gt;% str</code></pre>
+<pre><code>## 'data.frame':    2 obs. of  4 variables:
+##  $ row         : num  1 51
+##  $ Sepal.Length: num  5.1 7
+##  $ Species     : chr  &quot;setosa&quot; &quot;versicolor&quot;
+##  $ Species_num : int  1 2</code></pre>
+</div>
+<div id="rename-e-select" class="section level2">
+<h2>Rename e Select</h2>
+<pre class="r"><code># Renaming -----------------------------------------
+# * select() keeps only the variables you specify
+select(iris, petal_length = Petal.Length) %&gt;% head()</code></pre>
+<pre><code>##   petal_length
+## 1          1.4
+## 2          1.4
+## 3          1.3
+## 4          1.5
+## 5          1.4
+## 6          1.7</code></pre>
+<pre class="r"><code># * rename() keeps all variables
+rename(iris, petal_length = Petal.Length) %&gt;% head()</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width petal_length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
+<pre class="r"><code>vars &lt;- list(
+  var1 = sym(&quot;cyl&quot;),
+  var2 = sym(&quot;am&quot;)
+)
+select(mtcars, !!!vars) %&gt;% head()</code></pre>
+<pre><code>##                   var1 var2
+## Mazda RX4            6    1
+## Mazda RX4 Wag        6    1
+## Datsun 710           4    1
+## Hornet 4 Drive       6    0
+## Hornet Sportabout    8    0
+## Valiant              6    0</code></pre>
+<pre class="r"><code>vars &lt;- c(var1 = &quot;cyl&quot;, var2 =&quot;am&quot;)
+select(mtcars, !!vars) %&gt;% head()</code></pre>
+<pre><code>##                   var1 var2
+## Mazda RX4            6    1
+## Mazda RX4 Wag        6    1
+## Datsun 710           4    1
+## Hornet 4 Drive       6    0
+## Hornet Sportabout    8    0
+## Valiant              6    0</code></pre>
+<pre class="r"><code>rename(mtcars, !!vars) %&gt;% head()</code></pre>
+<pre><code>##                    mpg var1 disp  hp drat    wt  qsec vs var2 gear carb
+## Mazda RX4         21.0    6  160 110 3.90 2.620 16.46  0    1    4    4
+## Mazda RX4 Wag     21.0    6  160 110 3.90 2.875 17.02  0    1    4    4
+## Datsun 710        22.8    4  108  93 3.85 2.320 18.61  1    1    4    1
+## Hornet 4 Drive    21.4    6  258 110 3.08 3.215 19.44  1    0    3    1
+## Hornet Sportabout 18.7    8  360 175 3.15 3.440 17.02  0    0    3    2
+## Valiant           18.1    6  225 105 2.76 3.460 20.22  1    0    3    1</code></pre>
+</div>
+<div id="arrange" class="section level2">
+<h2>Arrange</h2>
+<pre class="r"><code>arrange(mtcars, cyl, disp)</code></pre>
+<pre><code>##     mpg cyl  disp  hp drat    wt  qsec vs am gear carb
+## 1  33.9   4  71.1  65 4.22 1.835 19.90  1  1    4    1
+## 2  30.4   4  75.7  52 4.93 1.615 18.52  1  1    4    2
+## 3  32.4   4  78.7  66 4.08 2.200 19.47  1  1    4    1
+## 4  27.3   4  79.0  66 4.08 1.935 18.90  1  1    4    1
+## 5  30.4   4  95.1 113 3.77 1.513 16.90  1  1    5    2
+## 6  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    1
+## 7  21.5   4 120.1  97 3.70 2.465 20.01  1  0    3    1
+## 8  26.0   4 120.3  91 4.43 2.140 16.70  0  1    5    2
+## 9  21.4   4 121.0 109 4.11 2.780 18.60  1  1    4    2
+## 10 22.8   4 140.8  95 3.92 3.150 22.90  1  0    4    2
+## 11 24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2
+## 12 19.7   6 145.0 175 3.62 2.770 15.50  0  1    5    6
+## 13 21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    4
+## 14 21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    4
+## 15 19.2   6 167.6 123 3.92 3.440 18.30  1  0    4    4
+## 16 17.8   6 167.6 123 3.92 3.440 18.90  1  0    4    4
+## 17 18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    1
+## 18 21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    1
+## 19 16.4   8 275.8 180 3.07 4.070 17.40  0  0    3    3
+## 20 17.3   8 275.8 180 3.07 3.730 17.60  0  0    3    3
+## 21 15.2   8 275.8 180 3.07 3.780 18.00  0  0    3    3
+## 22 15.0   8 301.0 335 3.54 3.570 14.60  0  1    5    8
+## 23 15.2   8 304.0 150 3.15 3.435 17.30  0  0    3    2
+## 24 15.5   8 318.0 150 2.76 3.520 16.87  0  0    3    2
+## 25 13.3   8 350.0 245 3.73 3.840 15.41  0  0    3    4
+## 26 15.8   8 351.0 264 4.22 3.170 14.50  0  1    5    4
+## 27 18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    2
+## 28 14.3   8 360.0 245 3.21 3.570 15.84  0  0    3    4
+## 29 19.2   8 400.0 175 3.08 3.845 17.05  0  0    3    2
+## 30 14.7   8 440.0 230 3.23 5.345 17.42  0  0    3    4
+## 31 10.4   8 460.0 215 3.00 5.424 17.82  0  0    3    4
+## 32 10.4   8 472.0 205 2.93 5.250 17.98  0  0    3    4</code></pre>
+<pre class="r"><code>arrange(mtcars, desc(disp))</code></pre>
+<pre><code>##     mpg cyl  disp  hp drat    wt  qsec vs am gear carb
+## 1  10.4   8 472.0 205 2.93 5.250 17.98  0  0    3    4
+## 2  10.4   8 460.0 215 3.00 5.424 17.82  0  0    3    4
+## 3  14.7   8 440.0 230 3.23 5.345 17.42  0  0    3    4
+## 4  19.2   8 400.0 175 3.08 3.845 17.05  0  0    3    2
+## 5  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    2
+## 6  14.3   8 360.0 245 3.21 3.570 15.84  0  0    3    4
+## 7  15.8   8 351.0 264 4.22 3.170 14.50  0  1    5    4
+## 8  13.3   8 350.0 245 3.73 3.840 15.41  0  0    3    4
+## 9  15.5   8 318.0 150 2.76 3.520 16.87  0  0    3    2
+## 10 15.2   8 304.0 150 3.15 3.435 17.30  0  0    3    2
+## 11 15.0   8 301.0 335 3.54 3.570 14.60  0  1    5    8
+## 12 16.4   8 275.8 180 3.07 4.070 17.40  0  0    3    3
+## 13 17.3   8 275.8 180 3.07 3.730 17.60  0  0    3    3
+## 14 15.2   8 275.8 180 3.07 3.780 18.00  0  0    3    3
+## 15 21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    1
+## 16 18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    1
+## 17 19.2   6 167.6 123 3.92 3.440 18.30  1  0    4    4
+## 18 17.8   6 167.6 123 3.92 3.440 18.90  1  0    4    4
+## 19 21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    4
+## 20 21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    4
+## 21 24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2
+## 22 19.7   6 145.0 175 3.62 2.770 15.50  0  1    5    6
+## 23 22.8   4 140.8  95 3.92 3.150 22.90  1  0    4    2
+## 24 21.4   4 121.0 109 4.11 2.780 18.60  1  1    4    2
+## 25 26.0   4 120.3  91 4.43 2.140 16.70  0  1    5    2
+## 26 21.5   4 120.1  97 3.70 2.465 20.01  1  0    3    1
+## 27 22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    1
+## 28 30.4   4  95.1 113 3.77 1.513 16.90  1  1    5    2
+## 29 27.3   4  79.0  66 4.08 1.935 18.90  1  1    4    1
+## 30 32.4   4  78.7  66 4.08 2.200 19.47  1  1    4    1
+## 31 30.4   4  75.7  52 4.93 1.615 18.52  1  1    4    2
+## 32 33.9   4  71.1  65 4.22 1.835 19.90  1  1    4    1</code></pre>
+<pre class="r"><code># grouped arrange ignores groups
+by_cyl &lt;- mtcars %&gt;% group_by(cyl)
+by_cyl %&gt;% arrange(desc(wt))</code></pre>
+<pre><code>## # A tibble: 32 x 11
+## # Groups:   cyl [3]
+##      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1  10.4     8  460    215  3     5.42  17.8     0     0     3     4
+##  2  14.7     8  440    230  3.23  5.34  17.4     0     0     3     4
+##  3  10.4     8  472    205  2.93  5.25  18.0     0     0     3     4
+##  4  16.4     8  276.   180  3.07  4.07  17.4     0     0     3     3
+##  5  19.2     8  400    175  3.08  3.84  17.0     0     0     3     2
+##  6  13.3     8  350    245  3.73  3.84  15.4     0     0     3     4
+##  7  15.2     8  276.   180  3.07  3.78  18       0     0     3     3
+##  8  17.3     8  276.   180  3.07  3.73  17.6     0     0     3     3
+##  9  14.3     8  360    245  3.21  3.57  15.8     0     0     3     4
+## 10  15       8  301    335  3.54  3.57  14.6     0     1     5     8
+## # ... with 22 more rows</code></pre>
+<pre class="r"><code># Unless you specifically ask:
+by_cyl %&gt;% arrange(desc(wt), .by_group = TRUE)</code></pre>
+<pre><code>## # A tibble: 32 x 11
+## # Groups:   cyl [3]
+##      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1  24.4     4 147.     62  3.69  3.19  20       1     0     4     2
+##  2  22.8     4 141.     95  3.92  3.15  22.9     1     0     4     2
+##  3  21.4     4 121     109  4.11  2.78  18.6     1     1     4     2
+##  4  21.5     4 120.     97  3.7   2.46  20.0     1     0     3     1
+##  5  22.8     4 108      93  3.85  2.32  18.6     1     1     4     1
+##  6  32.4     4  78.7    66  4.08  2.2   19.5     1     1     4     1
+##  7  26       4 120.     91  4.43  2.14  16.7     0     1     5     2
+##  8  27.3     4  79      66  4.08  1.94  18.9     1     1     4     1
+##  9  33.9     4  71.1    65  4.22  1.84  19.9     1     1     4     1
+## 10  30.4     4  75.7    52  4.93  1.62  18.5     1     1     4     2
+## # ... with 22 more rows</code></pre>
+</div>
+<div id="mutate-e-transmute" class="section level2">
+<h2>Mutate e transmute</h2>
+<p>Criam novo atributo para o conjunto de dados. O Mutate mantém todos os atributos existentes, já o transmute mantém apenas os atributos que estão sendo criados.</p>
+<pre class="r"><code># mutate() vs transmute --------------------------
+# mutate() keeps all existing variables
+mtcars %&gt;%
+  mutate(displ_l = disp / 61.0237)</code></pre>
+<pre><code>##     mpg cyl  disp  hp drat    wt  qsec vs am gear carb  displ_l
+## 1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    4 2.621932
+## 2  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    4 2.621932
+## 3  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    1 1.769804
+## 4  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    1 4.227866
+## 5  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    2 5.899347
+## 6  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    1 3.687092
+## 7  14.3   8 360.0 245 3.21 3.570 15.84  0  0    3    4 5.899347
+## 8  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2 2.403984
+## 9  22.8   4 140.8  95 3.92 3.150 22.90  1  0    4    2 2.307300
+## 10 19.2   6 167.6 123 3.92 3.440 18.30  1  0    4    4 2.746474
+## 11 17.8   6 167.6 123 3.92 3.440 18.90  1  0    4    4 2.746474
+## 12 16.4   8 275.8 180 3.07 4.070 17.40  0  0    3    3 4.519556
+## 13 17.3   8 275.8 180 3.07 3.730 17.60  0  0    3    3 4.519556
+## 14 15.2   8 275.8 180 3.07 3.780 18.00  0  0    3    3 4.519556
+## 15 10.4   8 472.0 205 2.93 5.250 17.98  0  0    3    4 7.734700
+## 16 10.4   8 460.0 215 3.00 5.424 17.82  0  0    3    4 7.538055
+## 17 14.7   8 440.0 230 3.23 5.345 17.42  0  0    3    4 7.210313
+## 18 32.4   4  78.7  66 4.08 2.200 19.47  1  1    4    1 1.289663
+## 19 30.4   4  75.7  52 4.93 1.615 18.52  1  1    4    2 1.240502
+## 20 33.9   4  71.1  65 4.22 1.835 19.90  1  1    4    1 1.165121
+## 21 21.5   4 120.1  97 3.70 2.465 20.01  1  0    3    1 1.968088
+## 22 15.5   8 318.0 150 2.76 3.520 16.87  0  0    3    2 5.211090
+## 23 15.2   8 304.0 150 3.15 3.435 17.30  0  0    3    2 4.981671
+## 24 13.3   8 350.0 245 3.73 3.840 15.41  0  0    3    4 5.735477
+## 25 19.2   8 400.0 175 3.08 3.845 17.05  0  0    3    2 6.554830
+## 26 27.3   4  79.0  66 4.08 1.935 18.90  1  1    4    1 1.294579
+## 27 26.0   4 120.3  91 4.43 2.140 16.70  0  1    5    2 1.971365
+## 28 30.4   4  95.1 113 3.77 1.513 16.90  1  1    5    2 1.558411
+## 29 15.8   8 351.0 264 4.22 3.170 14.50  0  1    5    4 5.751864
+## 30 19.7   6 145.0 175 3.62 2.770 15.50  0  1    5    6 2.376126
+## 31 15.0   8 301.0 335 3.54 3.570 14.60  0  1    5    8 4.932510
+## 32 21.4   4 121.0 109 4.11 2.780 18.60  1  1    4    2 1.982836</code></pre>
+<pre class="r"><code># transmute keeps only the variables you create
+mtcars %&gt;%
+  transmute(displ_l = disp / 61.0237)</code></pre>
+<pre><code>##     displ_l
+## 1  2.621932
+## 2  2.621932
+## 3  1.769804
+## 4  4.227866
+## 5  5.899347
+## 6  3.687092
+## 7  5.899347
+## 8  2.403984
+## 9  2.307300
+## 10 2.746474
+## 11 2.746474
+## 12 4.519556
+## 13 4.519556
+## 14 4.519556
+## 15 7.734700
+## 16 7.538055
+## 17 7.210313
+## 18 1.289663
+## 19 1.240502
+## 20 1.165121
+## 21 1.968088
+## 22 5.211090
+## 23 4.981671
+## 24 5.735477
+## 25 6.554830
+## 26 1.294579
+## 27 1.971365
+## 28 1.558411
+## 29 5.751864
+## 30 2.376126
+## 31 4.932510
+## 32 1.982836</code></pre>
+</div>
+<div id="filter" class="section level2">
+<h2>Filter</h2>
+<pre class="r"><code>filter(starwars, species == &quot;Human&quot;)</code></pre>
+<pre><code>## # A tibble: 35 x 13
+##    name  height  mass hair_color skin_color eye_color birth_year gender
+##    &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; 
+##  1 Luke~    172    77 blond      fair       blue            19   male  
+##  2 Dart~    202   136 none       white      yellow          41.9 male  
+##  3 Leia~    150    49 brown      light      brown           19   female
+##  4 Owen~    178   120 brown, gr~ light      blue            52   male  
+##  5 Beru~    165    75 brown      light      blue            47   female
+##  6 Bigg~    183    84 black      light      brown           24   male  
+##  7 Obi-~    182    77 auburn, w~ fair       blue-gray       57   male  
+##  8 Anak~    188    84 blond      fair       blue            41.9 male  
+##  9 Wilh~    180    NA auburn, g~ fair       blue            64   male  
+## 10 Han ~    180    80 brown      fair       brown           29   male  
+## # ... with 25 more rows, and 5 more variables: homeworld &lt;chr&gt;,
+## #   species &lt;chr&gt;, films &lt;list&gt;, vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+<pre class="r"><code>filter(starwars, mass &gt; 1000)</code></pre>
+<pre><code>## # A tibble: 1 x 13
+##   name  height  mass hair_color skin_color eye_color birth_year gender
+##   &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; 
+## 1 Jabb~    175  1358 &lt;NA&gt;       green-tan~ orange           600 herma~
+## # ... with 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+## #   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+<pre class="r"><code># Multiple criteria
+filter(starwars, hair_color == &quot;none&quot; &amp; eye_color == &quot;black&quot;)</code></pre>
+<pre><code>## # A tibble: 9 x 13
+##   name  height  mass hair_color skin_color eye_color birth_year gender
+##   &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; 
+## 1 Nien~    160    68 none       grey       black             NA male  
+## 2 Gasg~    122    NA none       white, bl~ black             NA male  
+## 3 Kit ~    196    87 none       green      black             NA male  
+## 4 Plo ~    188    80 none       orange     black             22 male  
+## 5 Lama~    229    88 none       grey       black             NA male  
+## 6 Taun~    213    NA none       grey       black             NA female
+## 7 Shaa~    178    57 none       red, blue~ black             NA female
+## 8 Tion~    206    80 none       grey       black             NA male  
+## 9 BB8       NA    NA none       none       black             NA none  
+## # ... with 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+## #   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+<pre class="r"><code>filter(starwars, hair_color == &quot;none&quot; | eye_color == &quot;black&quot;)</code></pre>
+<pre><code>## # A tibble: 38 x 13
+##    name  height  mass hair_color skin_color eye_color birth_year gender
+##    &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; 
+##  1 Dart~    202   136 none       white      yellow          41.9 male  
+##  2 Gree~    173    74 &lt;NA&gt;       green      black           44   male  
+##  3 IG-88    200   140 none       metal      red             15   none  
+##  4 Bossk    190   113 none       green      red             53   male  
+##  5 Lobot    175    79 none       light      blue            37   male  
+##  6 Ackb~    180    83 none       brown mot~ orange          41   male  
+##  7 Nien~    160    68 none       grey       black           NA   male  
+##  8 Nute~    191    90 none       mottled g~ red             NA   male  
+##  9 Jar ~    196    66 none       orange     orange          52   male  
+## 10 Roos~    224    82 none       grey       orange          NA   male  
+## # ... with 28 more rows, and 5 more variables: homeworld &lt;chr&gt;,
+## #   species &lt;chr&gt;, films &lt;list&gt;, vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+<div id="complete-e-replace_na" class="section level2">
+<h2>Complete e replace_na</h2>
+<pre class="r"><code>df &lt;- tibble(
+  group = c(1:2, 1),
+  item_id = c(1:2, 2),
+  item_name = c(&quot;a&quot;, &quot;b&quot;, &quot;b&quot;),
+  value1 = 1:3,
+  value2 = 4:6
+)
+df %&gt;% complete(group, nesting(item_id, item_name))</code></pre>
+<pre><code>## # A tibble: 4 x 5
+##   group item_id item_name value1 value2
+##   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;      &lt;int&gt;  &lt;int&gt;
+## 1     1       1 a              1      4
+## 2     1       2 b              3      6
+## 3     2       1 a             NA     NA
+## 4     2       2 b              2      5</code></pre>
+<pre class="r"><code># You can also choose to fill in missing values
+df %&gt;% complete(group, nesting(item_id, item_name), fill = list(value1 = 0))</code></pre>
+<pre><code>## # A tibble: 4 x 5
+##   group item_id item_name value1 value2
+##   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt;  &lt;int&gt;
+## 1     1       1 a              1      4
+## 2     1       2 b              3      6
+## 3     2       1 a              0     NA
+## 4     2       2 b              2      5</code></pre>
+<pre class="r"><code>##### Replace na
+df &lt;- tibble(x = c(1, 2, NA), y = c(&quot;a&quot;, NA, &quot;b&quot;), z = list(1:5, NULL, 10:20))
+df %&gt;% replace_na(list(x = 0, y = &quot;unknown&quot;))</code></pre>
+<pre><code>## # A tibble: 3 x 3
+##       x y       z         
+##   &lt;dbl&gt; &lt;chr&gt;   &lt;list&gt;    
+## 1     1 a       &lt;int [5]&gt; 
+## 2     2 unknown &lt;NULL&gt;    
+## 3     0 b       &lt;int [11]&gt;</code></pre>
+<pre class="r"><code>df %&gt;% mutate(x = replace_na(x, 0))</code></pre>
+<pre><code>## # A tibble: 3 x 3
+##       x y     z         
+##   &lt;dbl&gt; &lt;chr&gt; &lt;list&gt;    
+## 1     1 a     &lt;int [5]&gt; 
+## 2     2 &lt;NA&gt;  &lt;NULL&gt;    
+## 3     0 b     &lt;int [11]&gt;</code></pre>
+<pre class="r"><code># NULL are the list-col equivalent of NAs
+df %&gt;% replace_na(list(z = list(5)))</code></pre>
+<pre><code>## # A tibble: 3 x 3
+##       x y     z         
+##   &lt;dbl&gt; &lt;chr&gt; &lt;list&gt;    
+## 1     1 a     &lt;int [5]&gt; 
+## 2     2 &lt;NA&gt;  &lt;dbl [1]&gt; 
+## 3    NA b     &lt;int [11]&gt;</code></pre>
+<pre class="r"><code>df$x %&gt;% replace_na(0)</code></pre>
+<pre><code>## [1] 1 2 0</code></pre>
+<pre class="r"><code>df$y %&gt;% replace_na(&quot;unknown&quot;)</code></pre>
+<pre><code>## [1] &quot;a&quot;       &quot;unknown&quot; &quot;b&quot;</code></pre>
+</div>
+<div id="separate-e-unite" class="section level2">
+<h2>Separate e Unite</h2>
+<pre class="r"><code># Separate is the complement of unite
+mtcars %&gt;%
+  unite(vs_am, vs, am) %&gt;%
+  separate(vs_am, c(&quot;vs&quot;, &quot;am&quot;))</code></pre>
+<pre><code>##                      mpg cyl  disp  hp drat    wt  qsec vs am gear carb
+## Mazda RX4           21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    4
+## Mazda RX4 Wag       21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    4
+## Datsun 710          22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    1
+## Hornet 4 Drive      21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    1
+## Hornet Sportabout   18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    2
+## Valiant             18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    1
+## Duster 360          14.3   8 360.0 245 3.21 3.570 15.84  0  0    3    4
+## Merc 240D           24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2
+## Merc 230            22.8   4 140.8  95 3.92 3.150 22.90  1  0    4    2
+## Merc 280            19.2   6 167.6 123 3.92 3.440 18.30  1  0    4    4
+## Merc 280C           17.8   6 167.6 123 3.92 3.440 18.90  1  0    4    4
+## Merc 450SE          16.4   8 275.8 180 3.07 4.070 17.40  0  0    3    3
+## Merc 450SL          17.3   8 275.8 180 3.07 3.730 17.60  0  0    3    3
+## Merc 450SLC         15.2   8 275.8 180 3.07 3.780 18.00  0  0    3    3
+## Cadillac Fleetwood  10.4   8 472.0 205 2.93 5.250 17.98  0  0    3    4
+## Lincoln Continental 10.4   8 460.0 215 3.00 5.424 17.82  0  0    3    4
+## Chrysler Imperial   14.7   8 440.0 230 3.23 5.345 17.42  0  0    3    4
+## Fiat 128            32.4   4  78.7  66 4.08 2.200 19.47  1  1    4    1
+## Honda Civic         30.4   4  75.7  52 4.93 1.615 18.52  1  1    4    2
+## Toyota Corolla      33.9   4  71.1  65 4.22 1.835 19.90  1  1    4    1
+## Toyota Corona       21.5   4 120.1  97 3.70 2.465 20.01  1  0    3    1
+## Dodge Challenger    15.5   8 318.0 150 2.76 3.520 16.87  0  0    3    2
+## AMC Javelin         15.2   8 304.0 150 3.15 3.435 17.30  0  0    3    2
+## Camaro Z28          13.3   8 350.0 245 3.73 3.840 15.41  0  0    3    4
+## Pontiac Firebird    19.2   8 400.0 175 3.08 3.845 17.05  0  0    3    2
+## Fiat X1-9           27.3   4  79.0  66 4.08 1.935 18.90  1  1    4    1
+## Porsche 914-2       26.0   4 120.3  91 4.43 2.140 16.70  0  1    5    2
+## Lotus Europa        30.4   4  95.1 113 3.77 1.513 16.90  1  1    5    2
+## Ford Pantera L      15.8   8 351.0 264 4.22 3.170 14.50  0  1    5    4
+## Ferrari Dino        19.7   6 145.0 175 3.62 2.770 15.50  0  1    5    6
+## Maserati Bora       15.0   8 301.0 335 3.54 3.570 14.60  0  1    5    8
+## Volvo 142E          21.4   4 121.0 109 4.11 2.780 18.60  1  1    4    2</code></pre>
 </div>
 </div>
 

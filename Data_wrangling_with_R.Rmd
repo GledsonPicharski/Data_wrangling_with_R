@@ -14,20 +14,28 @@ output:
   
 
 
-# Visão global 
+# Visão Geral
 
 
-## Resources  
+## Recursos
 
-- [Data wrangling cheatsheet (`dplyr`,`tidyr`)](http://ucsb-bren.github.io/refs/cheatsheets/data-wrangling-cheatsheet.pdf)
-
-
+- [Data wrangling cheatsheet (`dplyr`,`tidyr`)](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
+- [tidyverse](https://www.tidyverse.org/)
+- [dplyr no tidyverse](https://dplyr.tidyverse.org/)
+- [tidyr no tidyverse](https://tidyr.tidyverse.org/)
+- [Data wrangling with R and RStudio](https://www.rstudio.com/resources/webinars/data-wrangling-with-r-and-rstudio/)
+- [dplyr vignette: Introduction to dplyr](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html)
+- [Two-table verbs](https://cran.rstudio.com/web/packages/dplyr/vignettes/two-table.html)
+- [tidyr vignette: Tidy data](https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html)
+- [Introduction to dplyr for Faster Data Manipulation in R](https://rpubs.com/justmarkham/dplyr-tutorial)
 
 
 ## R e Rstudio
 
-- [R:](https://cran.rstudio.com/)
-- [RStudio:](https://www.rstudio.com/products/rstudio/download/)
+Caso ainda não tenha, instalale o R e RStudio.
+
+- [Download R](https://cran.rstudio.com/)
+- [Download RStudio](https://www.rstudio.com/products/rstudio/download/)
 
 
 ## Carregando/Instalando Pacotes
@@ -49,11 +57,180 @@ library(devtools)
 library(readr)
 # library(plyr)
 library(dplyr)
-library(broom)
 library(tidyr)
 library(stringr)
 library(ggplot2)
 
 # Check package versions after Packages pane -> Update
 devtools::session_info()
+```
+
+
+# Principais comandos do dplyr e do tidyr
+
+Tidyr e dplyr são projetados para ajudar a manipular conjuntos de dados, permitindo converter entre formatos *wide* e *long*, preencher valores e combinações ausentes, separar ou mesclar várias colunas, renomear e criar novas variáveis e resumir dados de acordo com o agrupamento variáveis.
+
+Dplyr e tidyr contam com os seguintes comandos principais:
+
+* Tidyr
++ `gather ()` e `spread ()` convertem dados entre formato largo e longo
++ `separate ()` e `unite ()` separam uma única coluna em múltiplas colunas e vice-versa
++ `complete ()` transforma valores faltantes implícitos em valores ausentes explícitos, completando combinações de dados perdidas
+
+* Dplyr
++ dados do subconjunto `filter ()` baseados em critérios lógicos
++ `select ()` seleciona certas colunas
++ `organize ()` ordena linhas pelo valor de uma coluna
++ rename () rename colunas
++ `group_by ()` agrupa dados por variáveis comuns para executar cálculos
++ `mutate ()` cria uma nova variável / coluna
++ `summarize ()` resume os dados em uma única linha de valores
+
+## Gather e Spread  
+
+```{r, eval=T, echo=T}
+## Gather (from example(gather)).
+
+# get first observation for each Species in iris data -- base R
+mini_iris <- iris[c(1, 51, 101), ]
+# gather Sepal.Length, Sepal.Width, Petal.Length, Petal.Width
+gather(mini_iris, key = flower_att, value = measurement,
+       Sepal.Length, Sepal.Width, Petal.Length, Petal.Width)
+# same result but less verbose
+gather(mini_iris, key = flower_att, value = measurement, -Species)
+
+# repeat iris example using dplyr and the pipe operator
+library(dplyr)
+mini_iris <-
+  iris %>%
+  group_by(Species) %>%
+  slice(1)
+mini_iris %>% gather(key = flower_att, value = measurement, -Species)
+
+
+## spread example
+
+# Spread and gather are complements
+df <- data.frame(x = c("a", "b"), y = c(3, 4), z = c(5, 6))
+df %>% spread(x, y) %>% gather(x, y, a:b, na.rm = TRUE)
+
+# Use 'convert = TRUE' to produce variables of mixed type
+df <- data.frame(row = rep(c(1, 51), each = 3),
+                 var = c("Sepal.Length", "Species", "Species_num"),
+                 value = c(5.1, "setosa", 1, 7.0, "versicolor", 2))
+df %>% spread(var, value) %>% str
+df %>% spread(var, value, convert = TRUE) %>% str
+
+
+
+```
+
+## Rename e Select
+
+```{r, eval=T, echo=T}
+# Renaming -----------------------------------------
+# * select() keeps only the variables you specify
+select(iris, petal_length = Petal.Length) %>% head()
+
+# * rename() keeps all variables
+rename(iris, petal_length = Petal.Length) %>% head()
+
+vars <- list(
+  var1 = sym("cyl"),
+  var2 = sym("am")
+)
+select(mtcars, !!!vars) %>% head()
+
+vars <- c(var1 = "cyl", var2 ="am")
+select(mtcars, !!vars) %>% head()
+rename(mtcars, !!vars) %>% head()
+```
+
+## Arrange  
+
+```{r, eval=T, echo=T}
+arrange(mtcars, cyl, disp)
+arrange(mtcars, desc(disp))
+
+# grouped arrange ignores groups
+by_cyl <- mtcars %>% group_by(cyl)
+by_cyl %>% arrange(desc(wt))
+# Unless you specifically ask:
+by_cyl %>% arrange(desc(wt), .by_group = TRUE)
+
+```
+
+## Mutate e transmute
+
+Criam novo atributo para o conjunto de dados. O Mutate mantém todos os atributos existentes, já o transmute mantém apenas os atributos que estão sendo criados.
+
+```{r, eval=T, echo=T}
+# mutate() vs transmute --------------------------
+# mutate() keeps all existing variables
+mtcars %>%
+  mutate(displ_l = disp / 61.0237)
+
+# transmute keeps only the variables you create
+mtcars %>%
+  transmute(displ_l = disp / 61.0237)
+```
+
+
+## Filter
+
+```{r, eval=T, echo=T}
+filter(starwars, species == "Human")
+filter(starwars, mass > 1000)
+
+
+# Multiple criteria
+filter(starwars, hair_color == "none" & eye_color == "black")
+filter(starwars, hair_color == "none" | eye_color == "black")
+
+```
+
+## Complete e replace_na
+
+```{r, eval=T, echo=T}
+df <- tibble(
+  group = c(1:2, 1),
+  item_id = c(1:2, 2),
+  item_name = c("a", "b", "b"),
+  value1 = 1:3,
+  value2 = 4:6
+)
+df %>% complete(group, nesting(item_id, item_name))
+
+# You can also choose to fill in missing values
+df %>% complete(group, nesting(item_id, item_name), fill = list(value1 = 0))
+
+
+##### Replace na
+df <- tibble(x = c(1, 2, NA), y = c("a", NA, "b"), z = list(1:5, NULL, 10:20))
+df %>% replace_na(list(x = 0, y = "unknown"))
+df %>% mutate(x = replace_na(x, 0))
+
+# NULL are the list-col equivalent of NAs
+df %>% replace_na(list(z = list(5)))
+
+df$x %>% replace_na(0)
+df$y %>% replace_na("unknown")
+
+
+
+```
+
+
+## Separate e Unite  
+
+```{r, eval=T, echo=T}
+# Separate is the complement of unite
+mtcars %>%
+  unite(vs_am, vs, am) %>%
+  separate(vs_am, c("vs", "am"))
+```
+
+
+```{r, eval=T, echo=T}
+
 ```
